@@ -154,3 +154,19 @@ int main()
     while (choice != 5);
     return 0;
 }
+
+void displayBill(int i) {
+    printf("\n================ PATIENT BILL ================\n");
+    printf("Patient Name  : %s\n", patientName[i]);
+    printf("Age           : %d\n", patientAge[i]);
+    printf("Specialty     : %s\n", specialtyName[specialtyIndex[i]]);
+    printf("Base Fee      : $%.2f\n", baseFee[specialtyIndex[i]]);
+    printf("Surcharge     : $%.2f\n", surcharge[i]);
+    printf("Ward Cost     : $%.2f\n", wardCost[i]);
+    printf("Gross Total   : $%.2f\n", grossTotal[i]);
+    printf("Discount      : -$%.2f\n", discount[i]);
+    printf("----------------------------------------------\n");
+    printf("Final Amount  : $%.2f\n", finalAmount[i]);
+    printf("Est. Wait Time: %d mins\n", waitTime[i]);
+    printf("==============================================\n");
+}
