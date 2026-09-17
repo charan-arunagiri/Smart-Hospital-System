@@ -151,7 +151,7 @@ int main()
                 registerPatient();
                 break;
             case 2:
-                printf("Display bed occupancy pending implementation.\n");
+                displayBedOccupancy();
                 break;
             case 3:
                 printf("Triage display pending implementation.\n");
@@ -217,4 +217,21 @@ void savePatientRecord(int i) {
     if (file == NULL) return;
     fprintf(file, "%s,%d,%d,%.2f\n", patientName[i], patientAge[i], urgencyLevel[i], finalAmount[i]);
     fclose(file);
+}
+
+void displayBedOccupancy() {
+    printf("\n---------------- BED OCCUPANCY STATUS ----------------\n");
+    for (int w = 0; w < NUM_WARDS; w++) {
+        int occupied = 0;
+        for (int b = 0; b < wardCapacity[w]; b++) {
+            if (bedOccupancy[w][b] == 1) occupied++;
+        }
+        printf("%s: %d / %d beds occupied\n", wardName[w], occupied, wardCapacity[w]);
+        printf("  Beds: ");
+        for (int b = 0; b < wardCapacity[w]; b++) {
+            printf("%d ", bedOccupancy[w][b]);
+        }
+        printf("\n");
+    }
+    printf("--------------------------------------------------------\n");
 }
