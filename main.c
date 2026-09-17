@@ -6,53 +6,52 @@
 #define MAX_PATIENTS   100
 #define NUM_SPECIALTIES  4
 
+void registerPatient();
+void displayBill(int i);
+void registerPatient();
+int findFreeBed(int wIdx);
+int calcWaitTime(int sIdx);
+float calcSurcharge(int urgency, float base);
+float calcWardCost(int days, float rate);
+float calcDiscount(int age, float gross);
+void savePatientRecord(int i);
+void displayBedOccupancy();
+void sortAndDisplayByPriority();
 
-char specialtyName[NUM_SPECIALTIES][30] = {
-    "General Practice (OPD)", "Paediatrics", "Cardiology", "Neurology"};
-float baseFee[NUM_SPECIALTIES] = {1500.00, 2500.00, 4500.00, 5000.00};
-int wardIDArr[NUM_WARDS] = {1, 2, 3, 4};
-float wardRate[NUM_WARDS] = {3000.00, 6000.00, 12000.00, 25000.00};
 int wardCapacity[NUM_WARDS] = {20, 10, 10, 5};
 int bedOccupancy[NUM_WARDS][MAX_BEDS] = {0};
 char wardName[NUM_WARDS][40] = {
     "General Ward", "Paediatric Ward", "Surgical Ward", "ICU (Intensive Care Unit)"};
 int specialtyID[NUM_SPECIALTIES] = {1, 2, 3, 4};
+char specialtyName[NUM_SPECIALTIES][30] = {
+    "General Practice (OPD)", "Paediatrics", "Cardiology", "Neurology"};
+float baseFee[NUM_SPECIALTIES] = {1500.00, 2500.00, 4500.00, 5000.00};
+int wardIDArr[NUM_WARDS] = {1, 2, 3, 4};
+float wardRate[NUM_WARDS] = {3000.00, 6000.00, 12000.00, 25000.00};
 
-
+int patientCount = 0;
+char patientName[MAX_PATIENTS][50];
+int patientAge[MAX_PATIENTS];
+int urgencyLevel[MAX_PATIENTS];
 int isAdmitted[MAX_PATIENTS];
 int specialtyIndex[MAX_PATIENTS];
 int wardIndex[MAX_PATIENTS];
 int bedNumber[MAX_PATIENTS];
 int daysAdmitted[MAX_PATIENTS];
-int patientCount = 0;
-char patientName[MAX_PATIENTS][50];
-int patientAge[MAX_PATIENTS];
-int urgencyLevel[MAX_PATIENTS];
 
-
+int queueCount[NUM_SPECIALTIES] = {0};
+int waitTime[MAX_PATIENTS];
 float surcharge[MAX_PATIENTS];
 float wardCost[MAX_PATIENTS];
 float grossTotal[MAX_PATIENTS];
 float discount[MAX_PATIENTS];
 float finalAmount[MAX_PATIENTS];
-int queueCount[NUM_SPECIALTIES] = {0};
-int waitTime[MAX_PATIENTS];
 
 int findFreeBed(int wIdx);
 int calcWaitTime(int sIdx);
 float calcSurcharge(int urgency, float base);
 float calcWardCost(int days, float rate);
 float calcDiscount(int age, float gross);
-
-void registerPatient();
-void displayBill(int i);
-float calcSurcharge(int urgency, float base);
-float calcWardCost(int days, float rate);
-float calcDiscount(int age, float gross);
-void registerPatient();
-int findFreeBed(int wIdx);
-int calcWaitTime(int sIdx);
-void savePatientRecord(int i);
 
 
 void registerPatient() {
@@ -126,6 +125,98 @@ void registerPatient() {
     savePatientRecord(i);
 }
 
+void displayBill(int i) {
+    printf("\n================ PATIENT BILL ================\n");
+    printf("Patient Name  : %s\n", patientName[i]);
+    printf("Age           : %d\n", patientAge[i]);
+    printf("Specialty     : %s\n", specialtyName[specialtyIndex[i]]);
+    printf("Base Fee      : $%.2f\n", baseFee[specialtyIndex[i]]);
+    printf("Surcharge     : $%.2f\n", surcharge[i]);
+    printf("Ward Cost     : $%.2f\n", wardCost[i]);
+    printf("Gross Total   : $%.2f\n", grossTotal[i]);
+    printf("Discount      : -$%.2f\n", discount[i]);
+    printf("----------------------------------------------\n");
+    printf("Final Amount  : $%.2f\n", finalAmount[i]);
+    printf("Est. Wait Time: %d mins\n", waitTime[i]);
+    printf("==============================================\n");
+}
+
+int findFreeBed(int wIdx) {
+    if (wIdx < 0 || wIdx >= NUM_WARDS) return -1;
+    for (int b = 0; b < wardCapacity[wIdx]; b++) {
+        if (bedOccupancy[wIdx][b] == 0) return b;
+    }
+    return -1;
+}
+
+int calcWaitTime(int sIdx) {
+    return queueCount[sIdx] * 15;
+}
+
+float calcSurcharge(int urgency, float base) {
+    if (urgency == 2) return base * 0.20f;
+    if (urgency == 3) return base * 0.50f;
+    return 0.0f;
+}
+
+float calcWardCost(int days, float rate) {
+    return days * rate;
+}
+
+float calcDiscount(int age, float gross) {
+    if (age >= 60 || age <= 12) return gross * 0.10f;
+    return 0.0f;
+}
+
+void savePatientRecord(int i) {
+    FILE *file = fopen("patient_records.txt", "a");
+    if (file == NULL) return;
+    fprintf(file, "%s,%d,%d,%.2f\n", patientName[i], patientAge[i], urgencyLevel[i], finalAmount[i]);
+    fclose(file);
+}
+
+void displayBedOccupancy() {
+    printf("\n---------------- BED OCCUPANCY STATUS ----------------\n");
+    for (int w = 0; w < NUM_WARDS; w++) {
+        int occupied = 0;
+        for (int b = 0; b < wardCapacity[w]; b++) {
+            if (bedOccupancy[w][b] == 1) occupied++;
+        }
+        printf("%s: %d / %d beds occupied\n", wardName[w], occupied, wardCapacity[w]);
+        printf("  Beds: ");
+        for (int b = 0; b < wardCapacity[w]; b++) {
+            printf("%d ", bedOccupancy[w][b]);
+        }
+        printf("\n");
+    }
+    printf("--------------------------------------------------------\n");
+}
+
+void sortAndDisplayByPriority(void) {
+    int order[MAX_PATIENTS];
+    for (int i = 0; i < patientCount; i++) {
+        order[i] = i;
+    }
+
+    for (int a = 0; a < patientCount - 1; a++) {
+        for (int b = 0; b < patientCount - 1 - a; b++) {
+            if (urgencyLevel[order[b]] < urgencyLevel[order[b + 1]]) {
+                int temp = order[b];
+                order[b] = order[b + 1];
+                order[b + 1] = temp;
+            }
+        }
+    }
+
+    printf("\n---------------- PATIENTS BY PRIORITY ----------------\n");
+    for (int k = 0; k < patientCount; k++) {
+        int i = order[k];
+        printf("%d. PAT-%d | %-20s | Urgency Level %d\n",
+               k + 1, 1000 + i + 1, patientName[i], urgencyLevel[i]);
+    }
+    printf("-------------------------------------------------------\n");
+}
+
 int main()
 {
     int choice;
@@ -147,14 +238,14 @@ int main()
         }
 
         switch (choice) {
-            case 1:
+              case 1:
                 registerPatient();
                 break;
             case 2:
                 displayBedOccupancy();
                 break;
             case 3:
-                printf("Triage display pending implementation.\n");
+                sortAndDisplayByPriority();
                 break;
             case 4:
                 printf("Summary report pending implementation.\n");
