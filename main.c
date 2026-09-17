@@ -39,7 +39,10 @@ int queueCount[NUM_SPECIALTIES] = {0};
 int waitTime[MAX_PATIENTS];
 
 void registerPatient();
-
+void displayBill(int i);
+float calcSurcharge(int urgency, float base);
+float calcWardCost(int days, float rate);
+float calcDiscount(int age, float gross);
 
 void registerPatient() {
     if (patientCount >= MAX_PATIENTS) {
@@ -169,4 +172,13 @@ void displayBill(int i) {
     printf("Final Amount  : $%.2f\n", finalAmount[i]);
     printf("Est. Wait Time: %d mins\n", waitTime[i]);
     printf("==============================================\n");
+}
+
+float calcWardCost(int days, float rate) {
+    return days * rate;
+}
+
+float calcDiscount(int age, float gross) {
+    if (age >= 60 || age <= 12) return gross * 0.10f;
+    return 0.0f;
 }
