@@ -38,11 +38,22 @@ float finalAmount[MAX_PATIENTS];
 int queueCount[NUM_SPECIALTIES] = {0};
 int waitTime[MAX_PATIENTS];
 
+int findFreeBed(int wIdx);
+int calcWaitTime(int sIdx);
+float calcSurcharge(int urgency, float base);
+float calcWardCost(int days, float rate);
+float calcDiscount(int age, float gross);
+
 void registerPatient();
 void displayBill(int i);
 float calcSurcharge(int urgency, float base);
 float calcWardCost(int days, float rate);
 float calcDiscount(int age, float gross);
+void registerPatient();
+int findFreeBed(int wIdx);
+int calcWaitTime(int sIdx);
+void savePatientRecord(int i);
+
 
 void registerPatient() {
     if (patientCount >= MAX_PATIENTS) {
@@ -181,4 +192,29 @@ float calcWardCost(int days, float rate) {
 float calcDiscount(int age, float gross) {
     if (age >= 60 || age <= 12) return gross * 0.10f;
     return 0.0f;
+}
+
+int findFreeBed(int wIdx) {
+    if (wIdx < 0 || wIdx >= NUM_WARDS) return -1;
+    for (int b = 0; b < wardCapacity[wIdx]; b++) {
+        if (bedOccupancy[wIdx][b] == 0) return b;
+    }
+    return -1;
+}
+
+int calcWaitTime(int sIdx) {
+    return queueCount[sIdx] * 15;
+}
+
+float calcSurcharge(int urgency, float base) {
+    if (urgency == 2) return base * 0.20f;
+    if (urgency == 3) return base * 0.50f;
+    return 0.0f;
+}
+
+void savePatientRecord(int i) {
+    FILE *file = fopen("patient_records.txt", "a");
+    if (file == NULL) return;
+    fprintf(file, "%s,%d,%d,%.2f\n", patientName[i], patientAge[i], urgencyLevel[i], finalAmount[i]);
+    fclose(file);
 }
