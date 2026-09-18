@@ -175,6 +175,21 @@ void savePatientRecord(int i) {
     fclose(file);
 }
 
+void saveBedsStatus(void) {
+    FILE *fp = fopen("beds_status.txt", "w");
+    if (fp == NULL) {
+        printf("Error: could not save bed status!\n");
+        return;
+    }
+    for (int w = 0; w < NUM_WARDS; w++) {
+        for (int b = 0; b < MAX_BEDS; b++) {
+            fprintf(fp, "%d ", bedOccupancy[w][b]);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+}
+
 void displayBedOccupancy() {
     printf("\n---------------- BED OCCUPANCY STATUS ----------------\n");
     for (int w = 0; w < NUM_WARDS; w++) {
@@ -260,69 +275,3 @@ int main()
     return 0;
 }
 
-void displayBill(int i) {
-    printf("\n================ PATIENT BILL ================\n");
-    printf("Patient Name  : %s\n", patientName[i]);
-    printf("Age           : %d\n", patientAge[i]);
-    printf("Specialty     : %s\n", specialtyName[specialtyIndex[i]]);
-    printf("Base Fee      : $%.2f\n", baseFee[specialtyIndex[i]]);
-    printf("Surcharge     : $%.2f\n", surcharge[i]);
-    printf("Ward Cost     : $%.2f\n", wardCost[i]);
-    printf("Gross Total   : $%.2f\n", grossTotal[i]);
-    printf("Discount      : -$%.2f\n", discount[i]);
-    printf("----------------------------------------------\n");
-    printf("Final Amount  : $%.2f\n", finalAmount[i]);
-    printf("Est. Wait Time: %d mins\n", waitTime[i]);
-    printf("==============================================\n");
-}
-
-float calcWardCost(int days, float rate) {
-    return days * rate;
-}
-
-float calcDiscount(int age, float gross) {
-    if (age >= 60 || age <= 12) return gross * 0.10f;
-    return 0.0f;
-}
-
-int findFreeBed(int wIdx) {
-    if (wIdx < 0 || wIdx >= NUM_WARDS) return -1;
-    for (int b = 0; b < wardCapacity[wIdx]; b++) {
-        if (bedOccupancy[wIdx][b] == 0) return b;
-    }
-    return -1;
-}
-
-int calcWaitTime(int sIdx) {
-    return queueCount[sIdx] * 15;
-}
-
-float calcSurcharge(int urgency, float base) {
-    if (urgency == 2) return base * 0.20f;
-    if (urgency == 3) return base * 0.50f;
-    return 0.0f;
-}
-
-void savePatientRecord(int i) {
-    FILE *file = fopen("patient_records.txt", "a");
-    if (file == NULL) return;
-    fprintf(file, "%s,%d,%d,%.2f\n", patientName[i], patientAge[i], urgencyLevel[i], finalAmount[i]);
-    fclose(file);
-}
-
-void displayBedOccupancy() {
-    printf("\n---------------- BED OCCUPANCY STATUS ----------------\n");
-    for (int w = 0; w < NUM_WARDS; w++) {
-        int occupied = 0;
-        for (int b = 0; b < wardCapacity[w]; b++) {
-            if (bedOccupancy[w][b] == 1) occupied++;
-        }
-        printf("%s: %d / %d beds occupied\n", wardName[w], occupied, wardCapacity[w]);
-        printf("  Beds: ");
-        for (int b = 0; b < wardCapacity[w]; b++) {
-            printf("%d ", bedOccupancy[w][b]);
-        }
-        printf("\n");
-    }
-    printf("--------------------------------------------------------\n");
-}
