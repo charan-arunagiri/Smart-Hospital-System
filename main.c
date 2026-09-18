@@ -17,6 +17,8 @@ float calcDiscount(int age, float gross);
 void savePatientRecord(int i);
 void displayBedOccupancy();
 void sortAndDisplayByPriority();
+void generateReport();
+void saveBedsStatus();
 
 int wardCapacity[NUM_WARDS] = {20, 10, 10, 5};
 int bedOccupancy[NUM_WARDS][MAX_BEDS] = {0};
@@ -207,7 +209,7 @@ void displayBedOccupancy() {
     printf("--------------------------------------------------------\n");
 }
 
-void sortAndDisplayByPriority(void) {
+void sortAndDisplayByPriority() {
     int order[MAX_PATIENTS];
     for (int i = 0; i < patientCount; i++) {
         order[i] = i;
@@ -232,7 +234,7 @@ void sortAndDisplayByPriority(void) {
     printf("-------------------------------------------------------\n");
 }
 
-void generateReport(void) {
+void generateReport() {
     int countLevel1 = 0, countLevel2 = 0, countLevel3 = 0;
     float totalRevenue = 0, totalDiscount = 0;
     float highestBill = -1;
@@ -278,6 +280,21 @@ void generateReport(void) {
     printf("===========================================================\n");
 }
 
+void saveBedsStatus() {
+    FILE *fp = fopen("beds_status.txt", "w");
+    if (fp == NULL) {
+        printf("Error: could not save bed status!\n");
+        return;
+    }
+    for (int w = 0; w < NUM_WARDS; w++) {
+        for (int b = 0; b < MAX_BEDS; b++) {
+            fprintf(fp, "%d ", bedOccupancy[w][b]);
+        }
+        fprintf(fp, "\n");
+    }
+    fclose(fp);
+}
+
 int main()
 {
     int choice;
@@ -309,7 +326,7 @@ int main()
                 sortAndDisplayByPriority();
                 break;
             case 4:
-                printf("Summary report pending implementation.\n");
+                generateReport();
                 break;
             case 5:
                 printf("Saving state and exiting system...\n");
