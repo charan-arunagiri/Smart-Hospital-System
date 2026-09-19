@@ -8,7 +8,6 @@
 
 void registerPatient();
 void displayBill(int i);
-void registerPatient();
 int findFreeBed(int wIdx);
 int calcWaitTime(int sIdx);
 float calcSurcharge(int urgency, float base);
@@ -48,13 +47,6 @@ float wardCost[MAX_PATIENTS];
 float grossTotal[MAX_PATIENTS];
 float discount[MAX_PATIENTS];
 float finalAmount[MAX_PATIENTS];
-
-int findFreeBed(int wIdx);
-int calcWaitTime(int sIdx);
-float calcSurcharge(int urgency, float base);
-float calcWardCost(int days, float rate);
-float calcDiscount(int age, float gross);
-
 
 void registerPatient() {
     if (patientCount >= MAX_PATIENTS) {
@@ -177,21 +169,6 @@ void savePatientRecord(int i) {
     fclose(file);
 }
 
-void saveBedsStatus(void) {
-    FILE *fp = fopen("beds_status.txt", "w");
-    if (fp == NULL) {
-        printf("Error: could not save bed status!\n");
-        return;
-    }
-    for (int w = 0; w < NUM_WARDS; w++) {
-        for (int b = 0; b < MAX_BEDS; b++) {
-            fprintf(fp, "%d ", bedOccupancy[w][b]);
-        }
-        fprintf(fp, "\n");
-    }
-    fclose(fp);
-}
-
 void displayBedOccupancy() {
     printf("\n---------------- BED OCCUPANCY STATUS ----------------\n");
     for (int w = 0; w < NUM_WARDS; w++) {
@@ -295,8 +272,7 @@ void saveBedsStatus() {
     fclose(fp);
 }
 
-int main()
-{
+int main() {
     int choice;
     do {
         printf("\n--------------- SMART HOSPITAL SYSTEM --------------\n");
@@ -307,16 +283,14 @@ int main()
         printf("   5. Save & Exit\n");
         printf("------------------------------------------------------\n");
         printf("  Enter your choice: ");
-        printf("\n------------------------------------------------------\n");
-        scanf("%d", &choice);
-    }
+
         if (scanf("%d", &choice) != 1) {
             printf("Invalid input. Exiting...\n");
             break;
         }
 
         switch (choice) {
-              case 1:
+            case 1:
                 registerPatient();
                 break;
             case 2:
@@ -329,12 +303,13 @@ int main()
                 generateReport();
                 break;
             case 5:
+                saveBedsStatus();
                 printf("Saving state and exiting system...\n");
                 break;
             default:
                 printf("Invalid choice, please try again.\n");
         }
-    while (choice != 5);
+    } while (choice != 5);
+
     return 0;
 }
-
